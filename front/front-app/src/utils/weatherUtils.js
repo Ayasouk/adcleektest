@@ -48,4 +48,15 @@ weatherUtils.getIconByCode = function (weatherCode) {
   return null;
 };
 
+weatherUtils.getClasseByIcon = {
+  'sun': "bi bi-sun",
+  'cloud-sun': "bi bi-cloud-sun",
+  'cloud-rain': "bi bi-cloud-rain",
+  'cloud-rain-heavy': "bi bi-cloud-rain-heavy",
+  'cloud-fog2': "bi bi-cloud-fog2",
+  'cloud-snow':"bi bi-cloud-snow",
+  'cloud-lightning': "bi bi-cloud-lightning",
+  'cloud-lightning-rain': "bi bi-cloud-lightning-rain"
+}
+
 module.exports = weatherUtils;

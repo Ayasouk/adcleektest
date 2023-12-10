@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import './citiesPage.css';
 import axios from "axios";
+import styles from "./citiesPage.module.css";
+import { getIconByCode, getClasseByIcon } from "../utils/weatherUtils";
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const CitiesList = () => {
     const [cities, setCities] = useState([]);
     const [forecasts, setForecasts] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [selectedCity, setSelectedCity] = useState("");
 
     useEffect( () => {
         const fetchData = async ()=>{
@@ -30,6 +33,7 @@ const CitiesList = () => {
 
 
     const handleCityClick = async (city) => {
+        setSelectedCity(city);
         setIsLoading(true);
         try {
             const response = await axios.get(`http://localhost:4000/api/v1/forecastCity/${city.insee}`);
@@ -44,23 +48,28 @@ const CitiesList = () => {
     return (<div className="container-fluid idcity">
         <div className="row">
             <div className="col-md-6">
+                
                 <table className="table">
-                    <thead>
+                    <thead className={styles.head}>
                         <tr>
-                            <th>Code Insee</th>
-                            <th>City</th>
-                            <th>Population</th>
+                            <th className={styles.line}>Code Insee</th>
+                            <th className={styles.line}>City</th>
+                            <th className={styles.line}>Population</th>
                         </tr>
                     </thead>
+                    
                     <tbody>
+                        
                         {cities.map((city, index) => {
-                            {/*className={index % 2 !== 0 ? 'odd-city' : ''}*/}
-                            return <tr key={city.insee}  onClick={()=> handleCityClick(city)} className="odd-city" >
-                                <td>{city.insee}</td>
-                                <td>{city.name}</td>
-                                <td>{city.population}</td>
+                             const bgColor = { backgroundColor: index % 2 !== 0 ? '#f2f2f2' : 'transparent' };
+                            return <tr key={city.insee}  onClick={()=> handleCityClick(city)} >
+                                    <td style={bgColor} className={styles.line}>{city.insee}</td>
+                                    <td style={bgColor} className={`${styles.line} ${selectedCity.insee==city.insee?"fw-bold":""}`}>{city.name}</td>
+                                    <td style={bgColor} className={styles.line}>{city.population}</td>
                             </tr>
+                        
                         })}
+                        
                     </tbody>
                 </table>
             </div>
@@ -69,14 +78,29 @@ const CitiesList = () => {
                 <div className="row">
                     {forecasts.length >0 && forecasts.slice(0,4).map((forecast,index) =>{
                         console.log(forecast);
-                        return <div className="col-md-6" key={index}>
+                        const iconClasse = getClasseByIcon[getIconByCode(forecast.details.weather)];
+                        const statClasse = {fontWeight: "bold"};
+
+                        return <div className="col-md-6 p-3" key={index}>
+                            
                             <div className="card">
-                                <div className="card-body text-center">
-                                    <div className="weather-icon">
+                                <div className="card-body">
+                                    <i className={`${iconClasse} ${styles.bi}`}>
+                                    </i>
+                                    <div className="pt-2">
+                                        <h6>Probabilité de pluie</h6>
+                                        <p className={`${styles.stat} py-3 fs-5`}>{forecast.details.probarain}%</p>
                                     </div>
-                                    <h6>Probabilité de pluie: {forecast.details.probarain}%</h6>
-                                    <p>Min: {forecast.details.tmin}°C</p>
-                                    <p>Max: {forecast.details.tmax}°C</p>
+                                    <div className="d-flex flex-row justify-content-evenly">
+                                        <div>
+                                            <p className={styles["stat-title"]}>Min</p>
+                                            <p className={`${styles.stat} fs-7`}>{forecast.details.tmin}°C</p>
+                                        </div>
+                                        <div>
+                                            <p className={styles["stat-title"]}>Max</p>
+                                            <p className={`${styles.stat} fs-7`}>{forecast.details.tmax}°C</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

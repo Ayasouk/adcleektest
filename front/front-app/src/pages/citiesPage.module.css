@@ -1,0 +1,34 @@
+/* In your CSS file */
+.odd-city {
+    background-color: #f2f2f2 !important; /* Replace with the color you want */
+}
+
+.titre {
+    color: navy;
+    font-size: 24px;
+}
+
+.dataline:hover {
+    
+}
+
+.line {
+    text-align: left;
+}
+
+.head {
+    border-bottom: black 4px;
+}
+
+.bi {
+    color: black;
+    font-size: 46px;
+}
+
+.stat {
+    font-weight: bold;
+}
+
+.stat-title {
+    font-weight:600;
+}
