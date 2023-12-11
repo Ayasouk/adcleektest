@@ -37,7 +37,9 @@ const CitiesList = () => {
         setIsLoading(true);
         try {
             const response = await axios.get(`http://localhost:4000/api/v1/forecastCity/${city.insee}`);
-            setForecasts(response.data.data); // Adjust according to your data structure
+            console.log(response.data.data.details);
+            const forecast = response.data.data.details.replace(/'/g, '"');
+            setForecasts(JSON.parse(forecast)); // Adjust according to your data structure
         } catch (error) {
             setError("Erreur lors de la récupération des prévisions météorologiques");
             console.error(error);
@@ -78,7 +80,7 @@ const CitiesList = () => {
                 <div className="row">
                     {forecasts.length >0 && forecasts.slice(0,4).map((forecast,index) =>{
                         console.log(forecast);
-                        const iconClasse = getClasseByIcon[getIconByCode(forecast.details.weather)];
+                        const iconClasse = getClasseByIcon[getIconByCode(forecast.weather)];
                         const statClasse = {fontWeight: "bold"};
 
                         return <div className="col-md-6 p-3" key={index}>
@@ -89,16 +91,16 @@ const CitiesList = () => {
                                     </i>
                                     <div className="pt-2">
                                         <h6>Probabilité de pluie</h6>
-                                        <p className={`${styles.stat} py-3 fs-5`}>{forecast.details.probarain}%</p>
+                                        <p className={`${styles.stat} py-3 fs-5`}>{forecast.probarain}%</p>
                                     </div>
                                     <div className="d-flex flex-row justify-content-evenly">
                                         <div>
                                             <p className={styles["stat-title"]}>Min</p>
-                                            <p className={`${styles.stat} fs-7`}>{forecast.details.tmin}°C</p>
+                                            <p className={`${styles.stat} fs-7`}>{forecast.tmin}°C</p>
                                         </div>
                                         <div>
                                             <p className={styles["stat-title"]}>Max</p>
-                                            <p className={`${styles.stat} fs-7`}>{forecast.details.tmax}°C</p>
+                                            <p className={`${styles.stat} fs-7`}>{forecast.tmax}°C</p>
                                         </div>
                                     </div>
                                 </div>

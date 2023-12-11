@@ -22,21 +22,42 @@ const getCities = async (req, res) => {
         console.log("ID : ",id)
 
         const response = await axios.get(`https://candidat.adcleek.it/cities/${id}/forecast`);
-        console.log(response.data);
-        const data = await db.get(`select * from forecast where forecast.insee=${id}`);
+        let data = await db.get(`select * from forecast where forecast.insee=${id}`);
         const forecasts = [];
-
-        if(!data) { // si les prévisions ne sont pas dans la bdd, on cherche dans l'api meteo
         
-            const dataforecast = await axios.get(`https://api.meteo-concept.com/api/forecast/daily?token=${process.env.API_METEO}&insee=${id}`)
+        if(!data) { // si les prévisions ne sont pas dans la bdd, on cherche dans l'api meteo
+         
+            const dataforecast = await axios.get(`https://api.meteo-concept.com/api/forecast/daily?token=5b2bc27d56993a96b4bc5b5cb6824d2127755db5052d3d24265a1a47c3fe1b37&insee=${id}`)
             console.log("FORECAST : ", dataforecast);
+            const formattedDate = new Date(dataforecast.data.update).toISOString().split('T')[0];
+            const formattedDetails = JSON.stringify(dataforecast.data.forecast);
+            // Escape single quotes by replacing each single quote with two single quotes
+            const sqlCompliantJson = formattedDetails.replace(/"/g, "'");
 
-            const details = JSON.stringify(dataforecast.details);
-            const query = `insert into forecast (date, insee, details) VALUES (?, ?, ?)`;
-            const formattedDate = dateup.split('T')[0];
-            await db.run(query, [dataforecast.date, id, details]);
+            const query = `insert into forecast (date, insee, details) VALUES \
+            (${formattedDate}, ${id}, \"${sqlCompliantJson}\")`;
+            await db.run(query);
 
-            data=dataforecast;
+            /*await db.run('BEGIN TRANSACTION;');
+            
+            try{
+                const query = `insert into forecast ( date, insee, details) VALUES ( ?, ?, ?)`;
+                const forecasts = dataforecast.data.forecast; // Assuming this is the correct path
+                const updateDate = dataforecast.data.update || new Date().toISOString();
+                const formattedDate = new Date(updateDate).toISOString().split('T')[0];
+
+                console.log("DATE : ", formattedDate, " ", id, " ", forecasts);
+                await db.run(query, [formattedDate, id, forecasts]);
+                await db.run('COMMIT;');
+                
+            } catch(error) {
+                console.log("Transaction Error: ", error);
+                await db.run('ROLLBACK;');
+            }*/
+            data = await db.get(`select * from forecast where forecast.insee=${id}`);
+            if(!data){
+                data= dataforecast.data;
+            }
         }
 
         res.status(200).json({
@@ -45,7 +66,8 @@ const getCities = async (req, res) => {
         });
 
     } catch(error) {
-        console.log(error);
+        console.log("ERROR : ", error);
+        res.status(500).send('Internal Server Error');
     }
  }
 
